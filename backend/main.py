@@ -1,7 +1,7 @@
 # 📄 backend/main.py (FastAPI pour graph live)
 
 from fastapi import FastAPI, WebSocket
-from graph_data import get_graph_data
+from .graph_data import get_graph_data
 import os
 from dotenv import load_dotenv
 
