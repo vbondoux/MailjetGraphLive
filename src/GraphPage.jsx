@@ -1,45 +1,54 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ForceGraph2D } from "react-force-graph";
+import Airtable from "airtable";
 
 export default function GraphPage() {
   const [graphData, setGraphData] = useState({ nodes: [], links: [] });
-  const ws = useRef(null);
 
   useEffect(() => {
-    // Charger les données initiales
-    fetch("https://mailjetgraphlive-production.up.railway.app/graph-data")
-      .then((res) => res.json())
-      .then((data) => setGraphData(data));
+    const base = new Airtable({ apiKey: import.meta.env.VITE_AIRTABLE_API_KEY }).base(import.meta.env.VITE_AIRTABLE_BASE_ID);
+    const table = import.meta.env.VITE_AIRTABLE_TABLE;
 
-    // Écoute WebSocket
-    ws.current = new WebSocket("wss://mailjetgraphlive-production.up.railway.app/ws/graph");
-    ws.current.onmessage = (event) => {
-      const newEvent = JSON.parse(event.data);
-      setGraphData((prev) => {
-        let newNodes = [...prev.nodes];
-        let newLinks = [...prev.links];
+    let nodes = [{ id: "mailing", label: "Mailing", type: "root" }];
+    let links = [];
 
-        if (newEvent.type === "open") {
-          if (!newNodes.find((n) => n.id === newEvent.email)) {
-            newNodes.push({ id: newEvent.email, label: newEvent.email, type: "user" });
-            newLinks.push({ source: "mailing", target: newEvent.email });
+    base(table)
+      .select({ view: "Grid view" })
+      .eachPage(
+        (records, fetchNextPage) => {
+          records.forEach((record) => {
+            const mailingId = record.get("MailingID");
+            const email = record.get("Email");
+            const type = record.get("Type");
+            const url = record.get("URL");
+
+            if (!nodes.find((n) => n.id === mailingId)) {
+              nodes.push({ id: mailingId, label: mailingId, type: "mailing" });
+              links.push({ source: "mailing", target: mailingId });
+            }
+
+            if (!nodes.find((n) => n.id === email)) {
+              nodes.push({ id: email, label: email, type: "user" });
+              links.push({ source: mailingId, target: email });
+            }
+
+            if (type === "click" && url) {
+              if (!nodes.find((n) => n.id === url)) {
+                nodes.push({ id: url, label: url, type: "url" });
+              }
+              links.push({ source: email, target: url });
+            }
+          });
+          fetchNextPage();
+        },
+        (err) => {
+          if (err) {
+            console.error(err);
+            return;
           }
+          setGraphData({ nodes, links });
         }
-
-        if (newEvent.type === "click") {
-          if (!newNodes.find((n) => n.id === newEvent.url)) {
-            newNodes.push({ id: newEvent.url, label: newEvent.url, type: "url" });
-            newLinks.push({ source: newEvent.email, target: newEvent.url });
-          }
-        }
-
-        return { nodes: newNodes, links: newLinks };
-      });
-    };
-
-    return () => {
-      if (ws.current) ws.current.close();
-    };
+      );
   }, []);
 
   return (
