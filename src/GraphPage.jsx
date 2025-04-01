@@ -7,12 +7,12 @@ export default function GraphPage() {
 
   useEffect(() => {
     // Charger les données initiales
-    fetch("https://TON_BACKEND_URL/graph-data")
+    fetch("https://mailjetgraphlive-production.up.railway.app/graph-data")
       .then((res) => res.json())
       .then((data) => setGraphData(data));
 
     // Écoute WebSocket
-    ws.current = new WebSocket("wss://TON_BACKEND_URL/ws/graph");
+    ws.current = new WebSocket("wss://mailjetgraphlive-production.up.railway.app/ws/graph");
     ws.current.onmessage = (event) => {
       const newEvent = JSON.parse(event.data);
       setGraphData((prev) => {
