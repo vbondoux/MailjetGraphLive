@@ -1,1 +1,1 @@
-web: npm run preview -- --host --port $PORT
+web: npm run preview -- --port $PORT
