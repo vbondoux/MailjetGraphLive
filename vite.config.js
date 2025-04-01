@@ -7,6 +7,11 @@ export default defineConfig({
     port: 3000
   },
   preview: {
-    allowedHosts: ['mailjetgraphlive-production.up.railway.app']
+    allowedHosts: ['mailjetgraphlive-production.up.railway.app'],
+    port: 4173
+  },
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true
   }
 })
