@@ -45,3 +45,23 @@ export default function GraphPage() {
         (err) => {
           if (err) {
             console.error(err);
+            return;
+          }
+          setGraphData({ nodes, links });
+        }
+      );
+  }, []);
+
+  return (
+    <div style={{ width: "100vw", height: "100vh", background: "#111" }}>
+      <h1 style={{ color: "white", padding: "10px" }}>📊 Mailjet Graph Live</h1>
+      <ForceGraph2D
+        graphData={graphData}
+        nodeAutoColorBy="type"
+        nodeLabel="label"
+        linkDirectionalParticles={2}
+        linkDirectionalArrowLength={3}
+      />
+    </div>
+  );
+}
