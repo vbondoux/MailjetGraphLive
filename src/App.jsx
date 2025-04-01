@@ -1,12 +1,8 @@
 import React from "react";
+import GraphPage from "./GraphPage";
 
 function App() {
-  return (
-    <div>
-      <h1>Mailjet Graph Live</h1>
-      <p>Frontend opérationnel.</p>
-    </div>
-  );
+  return <GraphPage />;
 }
 
 export default App;
